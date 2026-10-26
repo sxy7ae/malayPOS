@@ -25,8 +25,8 @@ router.get('/', async (req, res) => {
 
     const [list, count] = await Promise.all([
         pool.query(
-            `SELECT p.id, p.code, p.name, p.buy_price, p.sell_price,
-                    (p.sell_price - p.buy_price) AS profit,
+            `SELECT p.id, p.code, p.name, p.unit, p.category_id, p.supplier_id, 
+                    p.buy_price, p.sell_price, (p.sell_price - p.buy_price) AS profit,
                     p.min_stock, c.name AS category
              FROM products p
              LEFT JOIN categories c ON c.id = p.category_id
@@ -41,7 +41,13 @@ router.get('/', async (req, res) => {
         ),
     ]);
 
-    res.json({ data: list.rows, total: count.rows[0].total });
+    // Kasir tidak boleh melihat harga beli dan laba.
+const data =
+  req.user.role === 'admin'
+    ? list.rows
+    : list.rows.map(({ buy_price, profit, ...rest }) => rest);
+
+res.json({ data, total: count.rows[0].total });
 });
 
 // POST /api/products (khusus admin)

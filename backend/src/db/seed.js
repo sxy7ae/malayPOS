@@ -1,14 +1,21 @@
 import bcrypt from 'bcryptjs';
 import { pool } from './pool.js';
 
-// Password di-hash: hasilnya acak dan tidak bisa dibalik jadi password asli.
-const hash = await bcrypt.hash('admin123', 10);
+// Daftar akun awal. Password di-hash sebelum disimpan.
+const users = [
+  { username: 'admin',  password: 'admin123', fullName: 'Administrator', role: 'admin' },
+  { username: 'kasir1', password: 'kasir123', fullName: 'Kasir Satu',    role: 'kasir' },
+];
 
-await pool.query(
+for (const u of users) {
+  const hash = await bcrypt.hash(u.password, 10);
+  await pool.query(
     `INSERT INTO users (username, password_hash, full_name, role)
      VALUES ($1, $2, $3, $4)
      ON CONFLICT (username) DO NOTHING`,
-    ['admin', hash, 'Administrator', 'admin']
-);
-console.log('Admin dibuat (username: admin, password: admin123)');
+    [u.username, hash, u.fullName, u.role]
+  );
+  console.log(`Akun siap: ${u.username} (${u.role})`);
+}
+
 await pool.end();

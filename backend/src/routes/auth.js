@@ -20,7 +20,7 @@ router.post('/login', async (req, res) => {
     const { username, password } = parsed.data;
 
     const { rows } = await pool.query(
-        'SELECT id, username, full_name, role, password_hash, is_active FROM users WHERE username = $1',
+        'SELECT id, username, full_Name, role, password_hash, is_active FROM users WHERE username = $1',
         [username]
     );
     const user = rows[0];
@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
 
     res.json({
         token,
-        user: { id: user.id, username: user.username, fullname: user.full_name, role: user.role },
+        user: { id: user.id, username: user.username, fullName: user.full_name, role: user.role },
     });
 });
 
